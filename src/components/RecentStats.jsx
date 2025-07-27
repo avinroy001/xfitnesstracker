@@ -11,7 +11,7 @@ const RecentStats = ({ data, onEdit, onDelete }) => {
         {recentData.map((item) => (
           <div key={item.id} className="bg-white p-4 rounded shadow flex justify-between items-center">
             <div>
-              <p className="font-medium">{new Date(item.date).toLocaleDateString()}</p>
+              <p className="font-medium">{item.date}</p>
               <p className="text-sm text-gray-600">{item.description}</p>
               <p className="text-sm">Calories Intake = {item.intake} | Calories Burned = {item.burned}</p>
             </div>
