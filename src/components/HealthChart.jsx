@@ -4,37 +4,36 @@ import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, Legend, Resp
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const HealthChart = ({ data }) => {
-  // Get last 7 days of data
-  const getLast7Days = () => {
-    const today = new Date();
-    const dates = [];
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(today.getDate() - i);
-      dates.push(date.toISOString().split('T')[0]);
-    }
-    return dates;
-  };
-
-  const last7Days = getLast7Days();
-  
-  // Create data for each day (even if no data exists)
-  const weeklyData = last7Days.map(date => {
-    const item = data.find(d => d.date === date);
-    return {
-      date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      intake: item ? item.intake : 0,
-      burned: item ? item.burned : 0
-    };
-  });
-
+  // Always show pie chart (Overall Data)
   const totalIntake = data.reduce((sum, item) => sum + item.intake, 0);
   const totalBurned = data.reduce((sum, item) => sum + item.burned, 0);
 
   const pieData = [
-    { name: 'Intake', value: totalIntake },
-    { name: 'Burned', value: totalBurned }
+    { name: 'Intake', value: totalIntake || 1 },
+    { name: 'Burned', value: totalBurned || 1 }
   ];
+
+  // Weekly Health Trends - show only when data exists
+  const getWeeklyData = () => {
+    if (data.length === 0) return [];
+    
+    // Get last 7 unique dates
+    const uniqueDates = [...new Set(data.map(item => item.date))].sort().slice(-7);
+    
+    return uniqueDates.map(date => {
+      const items = data.filter(item => item.date === date);
+      const totalIntake = items.reduce((sum, item) => sum + item.intake, 0);
+      const totalBurned = items.reduce((sum, item) => sum + item.burned, 0);
+      
+      return {
+        date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        intake: totalIntake,
+        burned: totalBurned
+      };
+    });
+  };
+
+  const weeklyData = getWeeklyData();
 
   return (
     <div className="mb-10">
@@ -62,7 +61,7 @@ const HealthChart = ({ data }) => {
         </ResponsiveContainer>
       </div>
 
-      {/* Weekly Health Trends should always be visible after data is added */}
+      {/* Weekly Health Trends - visible when data exists */}
       {data.length > 0 && (
         <>
           <h2 className="text-xl font-semibold mb-4 mt-10">Weekly Health Trends</h2>
